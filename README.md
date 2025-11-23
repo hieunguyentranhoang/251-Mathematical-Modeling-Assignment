@@ -57,7 +57,42 @@ mkdir -p logs
 ```
 
 ---
+## 🧩 Benchmark Suite
 
+To evaluate the tool's correctness and scalability, we employ three distinct PNML models. Below are the representative visualizations of these networks.
+
+### 1. Functional Verification (`functional_test`)
+A synthetic model designed to verify all logic components: Parser, Concurrency (Fork/Join), Self-loop updates, and Deadlock detection.
+
+<p align="center">
+  <img src="functional_test.png" alt="Functional Test Petri Net" width="600">
+  <br>
+  <em>Figure 1: A compact net featuring non-determinism, concurrency, and a trap state.</em>
+</p>
+
+### 2. Scalability Benchmark (`philosophers_12`)
+**Dining Philosophers ($N=12$)**: A classic high-concurrency model with cyclic resource dependencies.
+* **Purpose:** Benchmarking BDD vs. Explicit performance (Memory/Time) and detecting circular deadlocks.
+* **Visualization:** The diagram below represents a segment of the ring ($P_i$ and $P_{i+1}$ competing for $Fork_{i+1}$).
+
+<p align="center">
+  <img src="philosophers_12.png" alt="Dining Philosophers Representative View" width="100%">
+  <br>
+  <em>Figure 2: Representative segment of the 12-Philosopher ring showing resource competition.</em>
+</p>
+
+### 3. Optimization Benchmark (`switches_15`)
+**Independent Switches ($N=15$)**: A model causing state-space explosion ($2^{15}$ states) with simple structure.
+* **Purpose:** Triggering the **Adaptive Optimization** mechanism (switching from Enumeration to Sampling).
+* **Visualization:** The diagram shows independent switch modules.
+
+<p align="center">
+  <img src="switches_15.png" alt="Switches 15 Representative View" width="100%">
+  <br>
+  <em>Figure 3: Independent toggle switch modules generating a combinatorial state space.</em>
+</p>
+
+---
 ## 🚀 Reproducing Experimental Results
 
 We provide specific commands to reproduce the results reported in the **Experimental Evaluation** section of the report.
