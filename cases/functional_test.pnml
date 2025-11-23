@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+  <net id="functional_test" type="http://www.pnml.org/version-2009/grammar/ptnet">
+    
+    <place id="p_start"><initialMarking><text>1</text></initialMarking></place>
+
+    <transition id="t_fail"/>
+    <transition id="t_work"/>
+
+    <place id="p_dead"/>
+    <arc id="a1" source="p_start" target="t_fail"/>
+    <arc id="a2" source="t_fail" target="p_dead"/>
+
+    <place id="p_proc1"/>
+    <place id="p_proc2"/>
+    <place id="p_final"/>
+
+    <arc id="a3" source="p_start" target="t_work"/>
+    <arc id="a4" source="t_work" target="p_proc1"/>
+    <arc id="a5" source="t_work" target="p_proc2"/>
+
+    <transition id="t_busy"/>
+    <arc id="a6" source="p_proc1" target="t_busy"/>
+    <arc id="a7" source="t_busy" target="p_proc1"/>
+
+    <transition id="t_join"/>
+    <arc id="a8" source="p_proc1" target="t_join"/>
+    <arc id="a9" source="p_proc2" target="t_join"/>
+    <arc id="a10" source="t_join" target="p_final"/>
+
+  </net>
+</pnml>

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+  <net id="phi12" type="http://www.pnml.org/version-2009/grammar/ptnet">
+    <place id="fork0"><initialMarking><text>1</text></initialMarking></place>
+    <place id="fork1"><initialMarking><text>1</text></initialMarking></place>
+    <place id="fork2"><initialMarking><text>1</text></initialMarking></place>
+    <place id="fork3"><initialMarking><text>1</text></initialMarking></place>
+    <place id="fork4"><initialMarking><text>1</text></initialMarking></place>
+    <place id="fork5"><initialMarking><text>1</text></initialMarking></place>
+    <place id="fork6"><initialMarking><text>1</text></initialMarking></place>
+    <place id="fork7"><initialMarking><text>1</text></initialMarking></place>
+    <place id="fork8"><initialMarking><text>1</text></initialMarking></place>
+    <place id="fork9"><initialMarking><text>1</text></initialMarking></place>
+    <place id="fork10"><initialMarking><text>1</text></initialMarking></place>
+    <place id="fork11"><initialMarking><text>1</text></initialMarking></place>
+    <place id="p0_has_left"/>
+    <place id="p0_eating"/>
+    <transition id="p0_take_left"/>
+    <transition id="p0_take_right"/>
+    <transition id="p0_release"/>
+    <arc id="a0_1" source="fork0" target="p0_take_left"/>
+    <arc id="a0_2" source="p0_take_left" target="p0_has_left"/>
+    <arc id="a0_3" source="p0_has_left" target="p0_take_right"/>
+    <arc id="a0_4" source="fork1" target="p0_take_right"/>
+    <arc id="a0_5" source="p0_take_right" target="p0_eating"/>
+    <arc id="a0_6" source="p0_eating" target="p0_release"/>
+    <arc id="a0_7" source="p0_release" target="fork0"/>
+    <arc id="a0_8" source="p0_release" target="fork1"/>
+    <place id="p1_has_left"/>
+    <place id="p1_eating"/>
+    <transition id="p1_take_left"/>
+    <transition id="p1_take_right"/>
+    <transition id="p1_release"/>
+    <arc id="a1_1" source="fork1" target="p1_take_left"/>
+    <arc id="a1_2" source="p1_take_left" target="p1_has_left"/>
+    <arc id="a1_3" source="p1_has_left" target="p1_take_right"/>
+    <arc id="a1_4" source="fork2" target="p1_take_right"/>
+    <arc id="a1_5" source="p1_take_right" target="p1_eating"/>
+    <arc id="a1_6" source="p1_eating" target="p1_release"/>
+    <arc id="a1_7" source="p1_release" target="fork1"/>
+    <arc id="a1_8" source="p1_release" target="fork2"/>
+    <place id="p2_has_left"/>
+    <place id="p2_eating"/>
+    <transition id="p2_take_left"/>
+    <transition id="p2_take_right"/>
+    <transition id="p2_release"/>
+    <arc id="a2_1" source="fork2" target="p2_take_left"/>
+    <arc id="a2_2" source="p2_take_left" target="p2_has_left"/>
+    <arc id="a2_3" source="p2_has_left" target="p2_take_right"/>
+    <arc id="a2_4" source="fork3" target="p2_take_right"/>
+    <arc id="a2_5" source="p2_take_right" target="p2_eating"/>
+    <arc id="a2_6" source="p2_eating" target="p2_release"/>
+    <arc id="a2_7" source="p2_release" target="fork2"/>
+    <arc id="a2_8" source="p2_release" target="fork3"/>
+    <place id="p3_has_left"/>
+    <place id="p3_eating"/>
+    <transition id="p3_take_left"/>
+    <transition id="p3_take_right"/>
+    <transition id="p3_release"/>
+    <arc id="a3_1" source="fork3" target="p3_take_left"/>
+    <arc id="a3_2" source="p3_take_left" target="p3_has_left"/>
+    <arc id="a3_3" source="p3_has_left" target="p3_take_right"/>
+    <arc id="a3_4" source="fork4" target="p3_take_right"/>
+    <arc id="a3_5" source="p3_take_right" target="p3_eating"/>
+    <arc id="a3_6" source="p3_eating" target="p3_release"/>
+    <arc id="a3_7" source="p3_release" target="fork3"/>
+    <arc id="a3_8" source="p3_release" target="fork4"/>
+    <place id="p4_has_left"/>
+    <place id="p4_eating"/>
+    <transition id="p4_take_left"/>
+    <transition id="p4_take_right"/>
+    <transition id="p4_release"/>
+    <arc id="a4_1" source="fork4" target="p4_take_left"/>
+    <arc id="a4_2" source="p4_take_left" target="p4_has_left"/>
+    <arc id="a4_3" source="p4_has_left" target="p4_take_right"/>
+    <arc id="a4_4" source="fork5" target="p4_take_right"/>
+    <arc id="a4_5" source="p4_take_right" target="p4_eating"/>
+    <arc id="a4_6" source="p4_eating" target="p4_release"/>
+    <arc id="a4_7" source="p4_release" target="fork4"/>
+    <arc id="a4_8" source="p4_release" target="fork5"/>
+    <place id="p5_has_left"/>
+    <place id="p5_eating"/>
+    <transition id="p5_take_left"/>
+    <transition id="p5_take_right"/>
+    <transition id="p5_release"/>
+    <arc id="a5_1" source="fork5" target="p5_take_left"/>
+    <arc id="a5_2" source="p5_take_left" target="p5_has_left"/>
+    <arc id="a5_3" source="p5_has_left" target="p5_take_right"/>
+    <arc id="a5_4" source="fork6" target="p5_take_right"/>
+    <arc id="a5_5" source="p5_take_right" target="p5_eating"/>
+    <arc id="a5_6" source="p5_eating" target="p5_release"/>
+    <arc id="a5_7" source="p5_release" target="fork5"/>
+    <arc id="a5_8" source="p5_release" target="fork6"/>
+    <place id="p6_has_left"/>
+    <place id="p6_eating"/>
+    <transition id="p6_take_left"/>
+    <transition id="p6_take_right"/>
+    <transition id="p6_release"/>
+    <arc id="a6_1" source="fork6" target="p6_take_left"/>
+    <arc id="a6_2" source="p6_take_left" target="p6_has_left"/>
+    <arc id="a6_3" source="p6_has_left" target="p6_take_right"/>
+    <arc id="a6_4" source="fork7" target="p6_take_right"/>
+    <arc id="a6_5" source="p6_take_right" target="p6_eating"/>
+    <arc id="a6_6" source="p6_eating" target="p6_release"/>
+    <arc id="a6_7" source="p6_release" target="fork6"/>
+    <arc id="a6_8" source="p6_release" target="fork7"/>
+    <place id="p7_has_left"/>
+    <place id="p7_eating"/>
+    <transition id="p7_take_left"/>
+    <transition id="p7_take_right"/>
+    <transition id="p7_release"/>
+    <arc id="a7_1" source="fork7" target="p7_take_left"/>
+    <arc id="a7_2" source="p7_take_left" target="p7_has_left"/>
+    <arc id="a7_3" source="p7_has_left" target="p7_take_right"/>
+    <arc id="a7_4" source="fork8" target="p7_take_right"/>
+    <arc id="a7_5" source="p7_take_right" target="p7_eating"/>
+    <arc id="a7_6" source="p7_eating" target="p7_release"/>
+    <arc id="a7_7" source="p7_release" target="fork7"/>
+    <arc id="a7_8" source="p7_release" target="fork8"/>
+    <place id="p8_has_left"/>
+    <place id="p8_eating"/>
+    <transition id="p8_take_left"/>
+    <transition id="p8_take_right"/>
+    <transition id="p8_release"/>
+    <arc id="a8_1" source="fork8" target="p8_take_left"/>
+    <arc id="a8_2" source="p8_take_left" target="p8_has_left"/>
+    <arc id="a8_3" source="p8_has_left" target="p8_take_right"/>
+    <arc id="a8_4" source="fork9" target="p8_take_right"/>
+    <arc id="a8_5" source="p8_take_right" target="p8_eating"/>
+    <arc id="a8_6" source="p8_eating" target="p8_release"/>
+    <arc id="a8_7" source="p8_release" target="fork8"/>
+    <arc id="a8_8" source="p8_release" target="fork9"/>
+    <place id="p9_has_left"/>
+    <place id="p9_eating"/>
+    <transition id="p9_take_left"/>
+    <transition id="p9_take_right"/>
+    <transition id="p9_release"/>
+    <arc id="a9_1" source="fork9" target="p9_take_left"/>
+    <arc id="a9_2" source="p9_take_left" target="p9_has_left"/>
+    <arc id="a9_3" source="p9_has_left" target="p9_take_right"/>
+    <arc id="a9_4" source="fork10" target="p9_take_right"/>
+    <arc id="a9_5" source="p9_take_right" target="p9_eating"/>
+    <arc id="a9_6" source="p9_eating" target="p9_release"/>
+    <arc id="a9_7" source="p9_release" target="fork9"/>
+    <arc id="a9_8" source="p9_release" target="fork10"/>
+    <place id="p10_has_left"/>
+    <place id="p10_eating"/>
+    <transition id="p10_take_left"/>
+    <transition id="p10_take_right"/>
+    <transition id="p10_release"/>
+    <arc id="a10_1" source="fork10" target="p10_take_left"/>
+    <arc id="a10_2" source="p10_take_left" target="p10_has_left"/>
+    <arc id="a10_3" source="p10_has_left" target="p10_take_right"/>
+    <arc id="a10_4" source="fork11" target="p10_take_right"/>
+    <arc id="a10_5" source="p10_take_right" target="p10_eating"/>
+    <arc id="a10_6" source="p10_eating" target="p10_release"/>
+    <arc id="a10_7" source="p10_release" target="fork10"/>
+    <arc id="a10_8" source="p10_release" target="fork11"/>
+    <place id="p11_has_left"/>
+    <place id="p11_eating"/>
+    <transition id="p11_take_left"/>
+    <transition id="p11_take_right"/>
+    <transition id="p11_release"/>
+    <arc id="a11_1" source="fork11" target="p11_take_left"/>
+    <arc id="a11_2" source="p11_take_left" target="p11_has_left"/>
+    <arc id="a11_3" source="p11_has_left" target="p11_take_right"/>
+    <arc id="a11_4" source="fork0" target="p11_take_right"/>
+    <arc id="a11_5" source="p11_take_right" target="p11_eating"/>
+    <arc id="a11_6" source="p11_eating" target="p11_release"/>
+    <arc id="a11_7" source="p11_release" target="fork11"/>
+    <arc id="a11_8" source="p11_release" target="fork0"/>
+  </net></pnml>

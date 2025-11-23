@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+  <net id="switches15" type="http://www.pnml.org/version-2009/grammar/ptnet">
+    <place id="sw0_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw0_on"/>
+    <transition id="t_sw0_on"/>
+    <transition id="t_sw0_off"/>
+    <arc id="sw0_1" source="sw0_off" target="t_sw0_on"/>
+    <arc id="sw0_2" source="t_sw0_on" target="sw0_on"/>
+    <arc id="sw0_3" source="sw0_on" target="t_sw0_off"/>
+    <arc id="sw0_4" source="t_sw0_off" target="sw0_off"/>
+    <place id="sw1_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw1_on"/>
+    <transition id="t_sw1_on"/>
+    <transition id="t_sw1_off"/>
+    <arc id="sw1_1" source="sw1_off" target="t_sw1_on"/>
+    <arc id="sw1_2" source="t_sw1_on" target="sw1_on"/>
+    <arc id="sw1_3" source="sw1_on" target="t_sw1_off"/>
+    <arc id="sw1_4" source="t_sw1_off" target="sw1_off"/>
+    <place id="sw2_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw2_on"/>
+    <transition id="t_sw2_on"/>
+    <transition id="t_sw2_off"/>
+    <arc id="sw2_1" source="sw2_off" target="t_sw2_on"/>
+    <arc id="sw2_2" source="t_sw2_on" target="sw2_on"/>
+    <arc id="sw2_3" source="sw2_on" target="t_sw2_off"/>
+    <arc id="sw2_4" source="t_sw2_off" target="sw2_off"/>
+    <place id="sw3_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw3_on"/>
+    <transition id="t_sw3_on"/>
+    <transition id="t_sw3_off"/>
+    <arc id="sw3_1" source="sw3_off" target="t_sw3_on"/>
+    <arc id="sw3_2" source="t_sw3_on" target="sw3_on"/>
+    <arc id="sw3_3" source="sw3_on" target="t_sw3_off"/>
+    <arc id="sw3_4" source="t_sw3_off" target="sw3_off"/>
+    <place id="sw4_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw4_on"/>
+    <transition id="t_sw4_on"/>
+    <transition id="t_sw4_off"/>
+    <arc id="sw4_1" source="sw4_off" target="t_sw4_on"/>
+    <arc id="sw4_2" source="t_sw4_on" target="sw4_on"/>
+    <arc id="sw4_3" source="sw4_on" target="t_sw4_off"/>
+    <arc id="sw4_4" source="t_sw4_off" target="sw4_off"/>
+    <place id="sw5_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw5_on"/>
+    <transition id="t_sw5_on"/>
+    <transition id="t_sw5_off"/>
+    <arc id="sw5_1" source="sw5_off" target="t_sw5_on"/>
+    <arc id="sw5_2" source="t_sw5_on" target="sw5_on"/>
+    <arc id="sw5_3" source="sw5_on" target="t_sw5_off"/>
+    <arc id="sw5_4" source="t_sw5_off" target="sw5_off"/>
+    <place id="sw6_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw6_on"/>
+    <transition id="t_sw6_on"/>
+    <transition id="t_sw6_off"/>
+    <arc id="sw6_1" source="sw6_off" target="t_sw6_on"/>
+    <arc id="sw6_2" source="t_sw6_on" target="sw6_on"/>
+    <arc id="sw6_3" source="sw6_on" target="t_sw6_off"/>
+    <arc id="sw6_4" source="t_sw6_off" target="sw6_off"/>
+    <place id="sw7_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw7_on"/>
+    <transition id="t_sw7_on"/>
+    <transition id="t_sw7_off"/>
+    <arc id="sw7_1" source="sw7_off" target="t_sw7_on"/>
+    <arc id="sw7_2" source="t_sw7_on" target="sw7_on"/>
+    <arc id="sw7_3" source="sw7_on" target="t_sw7_off"/>
+    <arc id="sw7_4" source="t_sw7_off" target="sw7_off"/>
+    <place id="sw8_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw8_on"/>
+    <transition id="t_sw8_on"/>
+    <transition id="t_sw8_off"/>
+    <arc id="sw8_1" source="sw8_off" target="t_sw8_on"/>
+    <arc id="sw8_2" source="t_sw8_on" target="sw8_on"/>
+    <arc id="sw8_3" source="sw8_on" target="t_sw8_off"/>
+    <arc id="sw8_4" source="t_sw8_off" target="sw8_off"/>
+    <place id="sw9_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw9_on"/>
+    <transition id="t_sw9_on"/>
+    <transition id="t_sw9_off"/>
+    <arc id="sw9_1" source="sw9_off" target="t_sw9_on"/>
+    <arc id="sw9_2" source="t_sw9_on" target="sw9_on"/>
+    <arc id="sw9_3" source="sw9_on" target="t_sw9_off"/>
+    <arc id="sw9_4" source="t_sw9_off" target="sw9_off"/>
+    <place id="sw10_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw10_on"/>
+    <transition id="t_sw10_on"/>
+    <transition id="t_sw10_off"/>
+    <arc id="sw10_1" source="sw10_off" target="t_sw10_on"/>
+    <arc id="sw10_2" source="t_sw10_on" target="sw10_on"/>
+    <arc id="sw10_3" source="sw10_on" target="t_sw10_off"/>
+    <arc id="sw10_4" source="t_sw10_off" target="sw10_off"/>
+    <place id="sw11_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw11_on"/>
+    <transition id="t_sw11_on"/>
+    <transition id="t_sw11_off"/>
+    <arc id="sw11_1" source="sw11_off" target="t_sw11_on"/>
+    <arc id="sw11_2" source="t_sw11_on" target="sw11_on"/>
+    <arc id="sw11_3" source="sw11_on" target="t_sw11_off"/>
+    <arc id="sw11_4" source="t_sw11_off" target="sw11_off"/>
+    <place id="sw12_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw12_on"/>
+    <transition id="t_sw12_on"/>
+    <transition id="t_sw12_off"/>
+    <arc id="sw12_1" source="sw12_off" target="t_sw12_on"/>
+    <arc id="sw12_2" source="t_sw12_on" target="sw12_on"/>
+    <arc id="sw12_3" source="sw12_on" target="t_sw12_off"/>
+    <arc id="sw12_4" source="t_sw12_off" target="sw12_off"/>
+    <place id="sw13_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw13_on"/>
+    <transition id="t_sw13_on"/>
+    <transition id="t_sw13_off"/>
+    <arc id="sw13_1" source="sw13_off" target="t_sw13_on"/>
+    <arc id="sw13_2" source="t_sw13_on" target="sw13_on"/>
+    <arc id="sw13_3" source="sw13_on" target="t_sw13_off"/>
+    <arc id="sw13_4" source="t_sw13_off" target="sw13_off"/>
+    <place id="sw14_off"><initialMarking><text>1</text></initialMarking></place>
+    <place id="sw14_on"/>
+    <transition id="t_sw14_on"/>
+    <transition id="t_sw14_off"/>
+    <arc id="sw14_1" source="sw14_off" target="t_sw14_on"/>
+    <arc id="sw14_2" source="t_sw14_on" target="sw14_on"/>
+    <arc id="sw14_3" source="sw14_on" target="t_sw14_off"/>
+    <arc id="sw14_4" source="t_sw14_off" target="sw14_off"/>
+  </net></pnml>
