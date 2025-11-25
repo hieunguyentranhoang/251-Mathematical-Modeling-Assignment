@@ -30,12 +30,9 @@ try:
     from dd import autoref as _bdd
 except Exception:
     HAVE_DD = False
-    _bdd = None  # type: ignore
+    _bdd = None  
 
-
-
-
-# === Small BDD helpers =========
+# === BDD helpers =========
 def _equiv(u, v):
     """BDD equivalence: u <-> v  ==  (u & v) | (~u & ~v)"""
     return (u & v) | (~u & ~v)
@@ -104,7 +101,6 @@ def _build_relation(
     return T
 
 
-# --- REPLACE your _count_current(...) by this version ---
 def _count_current(bdd, u, X):
     # 1) dd versions that support care_vars
     try:
@@ -147,7 +143,6 @@ class BDDReachResult:
 
 
 # === Main algorithm ======
-
 def symbolic_fixpoint(
     pn: "PetriNet",
     *,
@@ -210,7 +205,6 @@ def symbolic_fixpoint(
 
 
 # === CLI entrypoints (stable) =====
-
 def bdd_reachability(pn, **kwargs):
     """
     Stable wrapper for CLI (Task6_cli). Returns both summary and full object.
@@ -234,7 +228,6 @@ def run(pn, **kwargs):
 if __name__ == "__main__":
     try:
         from model import PetriNet
-        # You can add a tiny PN here if desired.
         print("Task3_bdd_reach: module loaded successfully.")
     except Exception:
         print("Task3_bdd_reach: loaded (no model imported).")
