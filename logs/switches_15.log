@@ -1,0 +1,19 @@
+✓ dd.autoref import successful
+2025-11-26 19:42:16 | INFO | Parsing PNML ...
+2025-11-26 19:42:16 | INFO | Parsed PNML: |P|=30 |T|=30
+2025-11-26 19:42:16 | INFO | Task 2: BFS explicit reachability ...
+2025-11-26 19:42:18 | INFO | Explicit: |Reach|=32768, time=2.006s, peak=24.8MB
+2025-11-26 19:42:18 | INFO | Task 3: BDD symbolic reachability ...
+2025-11-26 19:42:41 | INFO | BDD: |Reach|=32768, iters=15, time=22.567s, peak=235.4MB
+2025-11-26 19:42:41 | INFO | Task 4: Deadlock detection (BDD + ILP) ...
+2025-11-26 19:42:41 | INFO | Deadlock NOT found (method=BDD), time=0.400s, peak=0.0MB
+2025-11-26 19:42:41 | INFO | Task 5: Optimization over Reach ...
+2025-11-26 19:42:42 | INFO | Optimization: best=15 at ['sw0_off', 'sw10_off', 'sw11_off', 'sw12_off', 'sw13_off', 'sw14_off', 'sw1_off', 'sw2_off', 'sw3_off', 'sw4_off', 'sw5_off', 'sw6_off', 'sw7_off', 'sw8_off', 'sw9_off'], (method=heuristic_bdd_search), time=0.962s, peak=53.4MB
+
+=== SUMMARY ===
+PNML: cases/switches_15.pnml
+|P|=30, |T|=30
+Explicit: |Reach|=32768, time=2.006s, peak=24.8MB
+BDD: |Reach|=32768, iters=15, time=22.567s, peak=235.4MB
+Deadlock: none, marking=None, time=0.400s, peak=0.0MB
+Optimization: found=True, value=15, marking=['sw0_off', 'sw10_off', 'sw11_off', 'sw12_off', 'sw13_off', 'sw14_off', 'sw1_off', 'sw2_off', 'sw3_off', 'sw4_off', 'sw5_off', 'sw6_off', 'sw7_off', 'sw8_off', 'sw9_off'], method=heuristic_bdd_search, time=0.962s, peak=53.4MB

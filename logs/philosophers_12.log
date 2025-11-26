@@ -1,0 +1,19 @@
+✓ dd.autoref import successful
+2025-11-26 19:36:33 | INFO | Parsing PNML ...
+2025-11-26 19:36:33 | INFO | Parsed PNML: |P|=36 |T|=36
+2025-11-26 19:36:33 | INFO | Task 2: BFS explicit reachability ...
+2025-11-26 19:36:35 | INFO | Explicit: |Reach|=39202, time=1.567s, peak=29.2MB
+2025-11-26 19:36:35 | INFO | Task 3: BDD symbolic reachability ...
+2025-11-26 19:41:42 | INFO | BDD: |Reach|=39202, iters=12, time=307.161s, peak=1873.6MB
+2025-11-26 19:41:42 | INFO | Task 4: Deadlock detection (BDD + ILP) ...
+2025-11-26 19:41:45 | INFO | Deadlock FOUND (method=BDD + ILP), marking=['p0_has_left', 'p10_has_left', 'p11_has_left', 'p1_has_left', 'p2_has_left', 'p3_has_left', 'p4_has_left', 'p5_has_left', 'p6_has_left', 'p7_has_left', 'p8_has_left', 'p9_has_left'], time=3.447s, peak=6.0MB
+2025-11-26 19:41:45 | INFO | Task 5: Optimization over Reach ...
+2025-11-26 19:41:48 | INFO | Optimization: best=12 at ['fork0', 'fork1', 'fork10', 'fork11', 'fork2', 'fork3', 'fork4', 'fork5', 'fork6', 'fork7', 'fork8', 'fork9'], (method=heuristic_bdd_search), time=2.522s, peak=363.4MB
+
+=== SUMMARY ===
+PNML: cases/philosophers_12.pnml
+|P|=36, |T|=36
+Explicit: |Reach|=39202, time=1.567s, peak=29.2MB
+BDD: |Reach|=39202, iters=12, time=307.161s, peak=1873.6MB
+Deadlock: found, marking=['p0_has_left', 'p10_has_left', 'p11_has_left', 'p1_has_left', 'p2_has_left', 'p3_has_left', 'p4_has_left', 'p5_has_left', 'p6_has_left', 'p7_has_left', 'p8_has_left', 'p9_has_left'], time=3.447s, peak=6.0MB
+Optimization: found=True, value=12, marking=['fork0', 'fork1', 'fork10', 'fork11', 'fork2', 'fork3', 'fork4', 'fork5', 'fork6', 'fork7', 'fork8', 'fork9'], method=heuristic_bdd_search, time=2.522s, peak=363.4MB
