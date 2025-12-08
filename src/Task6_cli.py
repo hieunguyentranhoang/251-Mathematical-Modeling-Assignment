@@ -375,30 +375,46 @@ def main() -> None:
             f"time={t5e - t5s:.3f}s, peak={peak5:.1f}MB"
         )
 
-    # --- SUMMARY
-    print("\n=== SUMMARY ===")
-    print(f"PNML: {args.pnml}")
-    print(f"|P|={len(pn.places)}, |T|={len(pn.transitions)}")
-    print(
-        f"Explicit: |Reach|={exp_count}, "
-        f"time={t2e - t2s:.3f}s, peak={peak2:.1f}MB"
-    )
-    print(
-        f"BDD: |Reach|={bdd_count}, "
-        f"iters={bdd_iters if bdd_iters is not None else 'n/a'}, "
-        f"time={t3e - t3s:.3f}s, peak={peak3:.1f}MB"
-    )
-    print(
-        f"Deadlock: {'found' if deadlock_found else 'none'}, "
-        f"marking={human_marking(deadlock_mark)}, "
-        f"time={t4e - t4s:.3f}s, peak={peak4:.1f}MB"
-    )
-    print(
-        f"Optimization: found={opt_found}, value={opt_value}, "
-        f"marking={human_marking(opt_mark)}, "
-        f"method={opt_method if opt_method else 'n/a'}, "
-        f"time={t5e - t5s:.3f}s, peak={peak5:.1f}MB"
-    )
+    # --- SUMMARY TABLE ---
+    print("\n" + "="*85)
+    print(f" RESULTS SUMMARY | Model: {args.pnml}")
+    print("="*85)
+    
+ 
+    header = f"{'Task':<5} | {'Component':<20} | {'Result':<30} | {'Time (s)':<10} | {'Mem (MB)':<10}"
+    print(header)
+    print("-" * 85)
+
+    # Task 1: Parse
+    res_t1 = f"|P|={len(pn.places)}, |T|={len(pn.transitions)}"
+    print(f"{'1':<5} | {'PNML Parsing':<20} | {res_t1:<30} | {t1e - t1s:<10.4f} | {'-':<10}")
+
+    # Task 2: Explicit
+    res_t2 = f"Count={exp_count}" if exp_count is not None else "Failed"
+    print(f"{'2':<5} | {'Explicit Reach':<20} | {res_t2:<30} | {t2e - t2s:<10.4f} | {peak2:<10.2f}")
+
+    # Task 3: BDD
+    res_t3 = f"Count={bdd_count}" if bdd_count is not None else "Failed"
+    if bdd_iters is not None: res_t3 += f" (iters={bdd_iters})"
+    print(f"{'3':<5} | {'BDD Reach':<20} | {res_t3:<30} | {t3e - t3s:<10.4f} | {peak3:<10.2f}")
+
+    # Task 4: Deadlock
+    status_t4 = "FOUND" if deadlock_found else "None"
+    res_t4 = f"{status_t4}"
+    if deadlock_found and deadlock_mark:
+        m_str = human_marking(deadlock_mark)
+        if len(m_str) > 20: m_str = m_str[:17] + "..."
+        res_t4 += f" @ {m_str}"
+    print(f"{'4':<5} | {'Deadlock Check':<20} | {res_t4:<30} | {t4e - t4s:<10.4f} | {peak4:<10.2f}")
+
+    # Task 5: Optimize
+    if opt_found:
+        res_t5 = f"Max={opt_value}"
+    else:
+        res_t5 = "Not found/No solution"
+    print(f"{'5':<5} | {'Optimization':<20} | {res_t5:<30} | {t5e - t5s:<10.4f} | {peak5:<10.2f}")
+
+    print("="*85)
 
 
 if __name__ == "__main__":
