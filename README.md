@@ -1,9 +1,40 @@
 # Symbolic and Algebraic Reasoning in Petri Nets (CO2011 Assignment)
 
-This repository contains the implementation of a **1-safe Petri Net Analyzer** developed for the Mathematical Modeling course (CO2011). The toolchain integrates three complementary techniques to analyze concurrent systems:
-1.  **Explicit State Enumeration (BFS)** for baseline validation.
-2.  **Symbolic Reachability (BDDs)** for scalable state-space exploration.
-3.  **Hybrid Reasoning (BDD + ILP)** for deadlock detection and optimization.
+This repository contains the implementation of a **1-safe Petri Net Analyzer** developed for the Mathematical Modeling course (CO2011).  
+The toolchain is organized into six tasks that together support parsing, reachability analysis, deadlock detection, and optimization.
+
+At a high level, the analyzer combines three complementary techniques:
+
+1. **Explicit State Enumeration (BFS)** – for baseline validation and small state spaces.
+2. **Symbolic Reachability (BDDs)** – for scalable state-space exploration.
+3. **Hybrid Reasoning (BDD + ILP)** – for deadlock detection and algebraic optimization.
+
+These techniques are exposed through the following tasks:
+
+- **Task 1 – PNML Parsing & Net Construction**  
+  Parses PNML models (`.pnml`) into an internal `PetriNet` representation.  
+  Handles places, transitions, arcs, and initial markings for **1-safe** Petri nets and is the common frontend used by all other tasks.
+
+- **Task 2 – Explicit Reachability (BFS)**  
+  Performs classic explicit-state enumeration from the initial marking using breadth-first search.  
+  Produces the reachable state set and basic statistics (state count, time, memory) used as a baseline and for cross-checking the symbolic methods.
+
+- **Task 3 – Symbolic Reachability (BDDs)**  
+  Encodes markings as Boolean vectors and transitions as BDD relations to compute the reachable set symbolically.  
+  Supports both monolithic transition relations and topological (per-transition) image computation for experimentation.
+
+- **Task 4 – Deadlock Analysis (Hybrid BDD + ILP)**  
+  Uses the BDD-computed reachable set to symbolically filter **dead markings** (no enabled transitions),  
+  then applies an Integer Linear Programming (ILP) state-equation check to confirm that candidate deadlocks are truly reachable.
+
+- **Task 5 – Linear Optimization over Reachable Markings**  
+  Optimizes a user-defined **linear objective** over the reachable state space.  
+  Depending on the size of the state space, it either:
+  - enumerates all markings (for small nets), or  
+  - switches to **BDD-guided sampling** (adaptive optimization) for large nets such as `switches_15`.
+
+- **Task 6 – Command-line Interface & Experiment Harness**  
+  Provides a unified CLI to run Tasks 1–5 on PNML inputs, select objectives and modes, and reproduce the experiments reported in the assignment report.
 
 ## 📂 Project Structure
 
@@ -107,6 +138,11 @@ We provide specific commands to reproduce the results reported in the **Experime
       --confirm_ilp --seed 42 | tee logs/functional_test.log
     ```
     *(Note: The custom weight vector `0,0,0,0,10` targets the `p_final` place to test if the optimizer can bypass the deadlock).*
+  
+**Explanation:**
+* `--objective custom --weights 0,0,0,0,10`: assigns a high reward to the `p_final` place and zero to other places, forcing the optimizer to prefer the successful completion marking.
+* `--confirm_ilp`: enables the hybrid BDD+ILP deadlock checker to prove that the reported deadlock is reachable using the state equation.
+* `--seed 42`: makes any randomized components reproducible across runs.
 
 ### 2. Performance Benchmark (Explicit vs. BDD)
 * **Model:** `philosophers_12.pnml` (State space: ~39,202)
@@ -118,6 +154,10 @@ We provide specific commands to reproduce the results reported in the **Experime
       --objective uniform \
       --confirm_ilp --seed 42 | tee logs/philosophers_12.log
     ```
+**Explanation:**
+* `python -u`: runs Python in unbuffered mode so that progress logs (especially BDD iterations) are flushed to the terminal immediately during long executions.
+* `--objective uniform`: assigns equal weight to all places; this benchmark focuses on reachability and performance rather than a specific “business” goal.
+* `--confirm_ilp`: is kept on because this model contains a real circular deadlock; ILP is used to validate the deadlock witness returned by the BDD analysis.
 
 ### 3. Adaptive Optimization (Sampling Mode)
 * **Model:** `switches_15.pnml` (State space: 32,768)
@@ -130,16 +170,103 @@ We provide specific commands to reproduce the results reported in the **Experime
       --sample_limit 1000 \
       --seed 42 | tee logs/switches_15.log
     ```
-
+**Explanation:**
+* `--objective uniform`: again uses equal weights; the purpose of this benchmark is to stress the optimization engine on a large, deadlock-free state space.
+* `--enumeration_threshold 5000`: forces the optimizer to switch from full enumeration to BDD-based sampling once the reachable set is larger than 5000 states (here it is $2^{15} = 32768$).
+* `--sample_limit 1000`: bounds the number of BDD-guided samples explored, providing a good trade-off between runtime and solution quality for this model.
 ---
 
 ## 📊 Expected Output
+After running the commands, check the `logs/` folder. The exact numeric values for time and memory depend on your hardware, OS, and Python environment, and may vary slightly between runs (especially for BDD sampling). However, the overall qualitative behaviour should remain the same.
 
-After running the commands, check the `logs/` folder. The summary at the bottom of each log file should match the data in the report:
+Below we summarize the typical outcomes you should observe. You can paste the concrete numbers from your own log files into this section if desired.
 
-* **functional_test:** `Deadlock: found`, `Optimization: found` (Value=10 at `p_final`).
-* **philosophers_12:** `Explicit time` << `BDD time`, `Deadlock: found` (Circular wait).
-* **switches_15:** `Optimization method: sample_bdd`, `Value: 15`.
+### 1. `functional_test.pnml`
+From `logs/functional_test.log`, you should see for both Explicit and BDD:
+* **Reachable markings:** 4 states (the two branches, the trap, and the final state).
+* **Deadlock analysis:**
+    * *Deadlock:* found with a reachable dead marking (e.g., `p_final`, while `p_dead` is also a trap in the model).
+    * *ILP confirmation:* enabled by `--confirm_ilp` proves that the deadlock marking satisfies the state equation.
+* **Optimization:**
+    * *Optimization:* found with **Value ≈ 10** at a marking where `p_final` is marked (according to the custom weight vector 0,0,0,0,10).
+    * This benchmark mainly validates that all components of the tool—parsing, explicit reachability, BDD reachability, deadlock detection, and optimization—are logically consistent.
+
+### 2. `philosophers_12.pnml`
+From `logs/philosophers_12.log`, the interesting points are:
+* **Reachability:**
+    * Explicit BFS and BDD both report `|Reach| ≈ 39,202` markings.
+* **Performance comparison:**
+    * *Explicit BFS:* runs relatively fast (on the order of a few seconds and tens of MB of memory).
+    * *BDD reachability:* is much more expensive (hundreds of seconds and GB-level memory usage), illustrating the variable ordering and dependency effects discussed in the report.
+* **Deadlock analysis:**
+    * *Deadlock:* found with a circular-wait marking where all philosophers hold their left fork and wait for the right one.
+    * *ILP confirmation:* (due to `--confirm_ilp`) verifies that this circular deadlock is reachable.
+
+> **Note:** Exact timings and memory peaks in your environment may differ from those reported in the paper, but the relative ordering **Explicit time ≪ BDD time** and **Explicit memory ≪ BDD memory** should hold.
+
+### 3. `switches_15.pnml`
+From `logs/switches_15.log`, you should observe:
+* **Reachability:**
+    * Explicit BFS and BDD agree on `|Reach| = 32,768 = 2^{15}` markings.
+* **Deadlock analysis:**
+    * *Deadlock:* not found (the model is deadlock-free because any switch can always be toggled).
+* **Optimization:**
+    * The method reported should be **Optimization method: sample_bdd** (or similar), confirming that the adaptive optimizer switched to BDD-based sampling due to the large state space.
+    * The best objective value is typically **≈ 15** under the uniform weighting scheme (one token per switch); depending on the sampling path, the particular optimal marking reported may vary but should always achieve this value.
+
+> **Note:** Because sampling is randomized and the system environment is noisy, running the same command multiple times may yield slightly different runtimes, memory peaks, or even different (but still optimal or near-optimal) markings for the optimization task. The qualitative patterns above are what should match the Experimental Evaluation section.
+
+## 📈 Our Experimental Results
+
+This section presents the actual execution logs generated by our tool in our local environment. These results confirm the consistency between the theoretical design and the actual implementation.
+
+### 1. Functional Verification (`functional_test`)
+**Objective:** Verify that the tool correctly parses the Petri Net, identifies the trap state (deadlock), and finds the optimal path to the final state.
+
+**Execution Log:**
+```text
+================================================================================
+RESULTS SUMMARY | Model: cases/functional_test.pnml
+================================================================================
+Task | Component           | Result                       | Time (s) | Mem (MB)
+--------------------------------------------------------------------------------
+1    | PNML Parsing        | |P|=5, |T|=4                 | 0.0005   | -
+2    | Explicit Reach      | Count=4                      | 0.0031   | 0.00
+3    | BDD Reach           | Count=4 (iters=2)            | 0.0092   | 0.06
+4    | Deadlock Check      | FOUND @ ['p_final']          | 0.1446   | 0.15
+5    | Optimization        | Max=10                       | 0.0014   | 0.00
+================================================================================
+```
+
+### 2. `philosophers_12.pnml`
+```text
+=====================================================================================
+ RESULTS SUMMARY | Model: cases/philosophers_12.pnml
+=====================================================================================
+Task  | Component            | Result                         | Time (s)   | Mem (MB)  
+-------------------------------------------------------------------------------------
+1     | PNML Parsing         | |P|=36, |T|=36                 | 0.0020     | -         
+2     | Explicit Reach       | Count=39202                    | 1.6067     | 29.20     
+3     | BDD Reach            | Count=39202 (iters=12)         | 304.6340   | 1873.62   
+4     | Deadlock Check       | FOUND @ ['p0_has_left', '...   | 3.3144     | 6.00      
+5     | Optimization         | Max=12                         | 2.4697     | 363.37    
+=====================================================================================
+```
+
+### 3. `switches_15.pnml`
+```text
+=====================================================================================
+ RESULTS SUMMARY | Model: cases/switches_15.pnml
+=====================================================================================
+Task  | Component            | Result                         | Time (s)   | Mem (MB)  
+-------------------------------------------------------------------------------------
+1     | PNML Parsing         | |P|=30, |T|=30                 | 0.0015     | -         
+2     | Explicit Reach       | Count=32768                    | 2.0487     | 24.76     
+3     | BDD Reach            | Count=32768 (iters=15)         | 22.4772    | 235.35    
+4     | Deadlock Check       | None                           | 0.3965     | 0.00      
+5     | Optimization         | Max=15                         | 0.9675     | 53.35     
+=====================================================================================
+```
 
 ## 👥 Authors (Group 2H3D)
 * Nguyễn Trần Hoàng Hiếu (2452332)
