@@ -77,6 +77,10 @@ Run the following commands in your terminal to set up the environment:
 ```bash
 # 1. Create a virtual environment
 python3 -m venv .venv
+#Or
+python -m venv .venv
+#Or
+py -m venv .venv
 
 # 2. Activate the environment
 # On macOS/Linux:
