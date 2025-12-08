@@ -1,19 +1,36 @@
 ✓ dd.autoref import successful
-2025-11-26 19:36:33 | INFO | Parsing PNML ...
-2025-11-26 19:36:33 | INFO | Parsed PNML: |P|=36 |T|=36
-2025-11-26 19:36:33 | INFO | Task 2: BFS explicit reachability ...
-2025-11-26 19:36:35 | INFO | Explicit: |Reach|=39202, time=1.567s, peak=29.2MB
-2025-11-26 19:36:35 | INFO | Task 3: BDD symbolic reachability ...
-2025-11-26 19:41:42 | INFO | BDD: |Reach|=39202, iters=12, time=307.161s, peak=1873.6MB
-2025-11-26 19:41:42 | INFO | Task 4: Deadlock detection (BDD + ILP) ...
-2025-11-26 19:41:45 | INFO | Deadlock FOUND (method=BDD + ILP), marking=['p0_has_left', 'p10_has_left', 'p11_has_left', 'p1_has_left', 'p2_has_left', 'p3_has_left', 'p4_has_left', 'p5_has_left', 'p6_has_left', 'p7_has_left', 'p8_has_left', 'p9_has_left'], time=3.447s, peak=6.0MB
-2025-11-26 19:41:45 | INFO | Task 5: Optimization over Reach ...
-2025-11-26 19:41:48 | INFO | Optimization: best=12 at ['fork0', 'fork1', 'fork10', 'fork11', 'fork2', 'fork3', 'fork4', 'fork5', 'fork6', 'fork7', 'fork8', 'fork9'], (method=heuristic_bdd_search), time=2.522s, peak=363.4MB
+2025-12-08 16:40:45 | INFO | Parsing PNML ...
+2025-12-08 16:40:45 | INFO | Parsed PNML: |P|=36 |T|=36
+2025-12-08 16:40:45 | INFO | Task 2: BFS explicit reachability ...
+2025-12-08 16:40:47 | INFO | Explicit: |Reach|=39202, time=1.511s, peak=29.2MB
+2025-12-08 16:40:47 | INFO | Task 3: BDD symbolic reachability (Mode: topological) ...
+  [BDD] Iteration 1: Found 12 new states
+  [BDD] Iteration 2: Found 78 new states
+  [BDD] Iteration 3: Found 340 new states
+  [BDD] Iteration 4: Found 1089 new states
+  [BDD] Iteration 5: Found 2664 new states
+  [BDD] Iteration 6: Found 5068 new states
+  [BDD] Iteration 7: Found 7512 new states
+  [BDD] Iteration 8: Found 8580 new states
+  [BDD] Iteration 9: Found 7344 new states
+  [BDD] Iteration 10: Found 4464 new states
+  [BDD] Iteration 11: Found 1728 new states
+  [BDD] Iteration 12: Found 322 new states
+  [BDD] Iteration 13: Fixed point reached (No new states).
+2025-12-08 16:47:07 | INFO | BDD: |Reach|=39202, iters=12, time=380.004s, peak=2963.9MB
+2025-12-08 16:47:07 | INFO | Task 4: Deadlock detection (BDD + ILP) ...
+2025-12-08 16:47:11 | INFO | Deadlock FOUND (method=BDD + ILP), marking=['p0_has_left', 'p10_has_left', 'p11_has_left', 'p1_has_left', 'p2_has_left', 'p3_has_left', 'p4_has_left', 'p5_has_left', 'p6_has_left', 'p7_has_left', 'p8_has_left', 'p9_has_left'], time=3.931s, peak=4.9MB
+2025-12-08 16:47:11 | INFO | Task 5: Optimization over Reach ...
+2025-12-08 16:47:13 | INFO | Optimization: best=12 at ['fork0', 'fork1', 'fork10', 'fork11', 'fork2', 'fork3', 'fork4', 'fork5', 'fork6', 'fork7', 'fork8', 'fork9'], (method=heuristic_bdd_search), time=2.305s, peak=42.9MB
 
-=== SUMMARY ===
-PNML: cases/philosophers_12.pnml
-|P|=36, |T|=36
-Explicit: |Reach|=39202, time=1.567s, peak=29.2MB
-BDD: |Reach|=39202, iters=12, time=307.161s, peak=1873.6MB
-Deadlock: found, marking=['p0_has_left', 'p10_has_left', 'p11_has_left', 'p1_has_left', 'p2_has_left', 'p3_has_left', 'p4_has_left', 'p5_has_left', 'p6_has_left', 'p7_has_left', 'p8_has_left', 'p9_has_left'], time=3.447s, peak=6.0MB
-Optimization: found=True, value=12, marking=['fork0', 'fork1', 'fork10', 'fork11', 'fork2', 'fork3', 'fork4', 'fork5', 'fork6', 'fork7', 'fork8', 'fork9'], method=heuristic_bdd_search, time=2.522s, peak=363.4MB
+=====================================================================================
+ RESULTS SUMMARY | Model: cases/philosophers_12.pnml
+=====================================================================================
+Task  | Component            | Result                         | Time (s)   | Mem (MB)  
+-------------------------------------------------------------------------------------
+1     | PNML Parsing         | |P|=36, |T|=36                 | 0.0030     | -         
+2     | Explicit Reach       | Count=39202                    | 1.5114     | 29.20     
+3     | BDD (topo)           | Count=39202 (iters=12)         | 380.0044   | 2963.94   
+4     | Deadlock Check       | FOUND @ ['p0_has_left', '...   | 3.9305     | 4.90      
+5     | Optimization         | Max=12                         | 2.3052     | 42.88     
+=====================================================================================
