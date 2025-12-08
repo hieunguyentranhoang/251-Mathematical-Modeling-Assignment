@@ -67,36 +67,59 @@ def _unpack_bdd(bdd_res=None, bdd_manager=None, reachable_bdd=None, place_vars=N
 
 
 def _enabled_t(bdd, X: Dict[str, str], pre_set: Set[str]):
+    """Tạo công thức BDD kiểm tra xem một transition có được kích hoạt không."""
     En = bdd.true
     for p in pre_set:
         En &= bdd.var(X[p])
     return En
 
 
-def _verify_with_ilp(pn, candidate_marking: Set[str]) -> bool:
+#HYBRID: ILP STATE EQUATION
+def _verify_reachability_with_ilp(pn, candidate_marking: Set[str]) -> bool:
+    """
+    Sử dụng ILP để giải phương trình trạng thái: M = M0 + C * sigma
+    Để chứng minh tồn tại vector bắn (sigma) dẫn từ M0 đến Candidate M.
+    """
     if not HAVE_PULP:
         return True 
 
     try:
-        prob = pulp.LpProblem("Deadlock_Check", pulp.LpMinimize)
-        is_dead = True
+        prob = pulp.LpProblem("State_Equation_Check", pulp.LpMinimize)
         
+        sigma_vars = {}
         for t in pn.transitions:
-            pre_t = pn.pre.get(t, set())
-            if not pre_t: 
-                continue 
-            
-            current_sum = sum(1 for p in pre_t if p in candidate_marking)
-            
-            threshold = len(pre_t)
-            
-            if current_sum >= threshold:
-                is_dead = False
-                break
+            sigma_vars[t] = pulp.LpVariable(f"sigma_{t}", lowBound=0, cat=pulp.LpInteger)
+
+
+        prob += pulp.lpSum(sigma_vars.values())
+
         
-        return is_dead
+        for p in pn.places:
+            m0_val = 1 if p in pn.initial_marking else 0
+            
+            m_target_val = 1 if p in candidate_marking else 0
+            
+            token_flow = []
+            for t in pn.transitions:
+                weight_post = 1 if p in pn.post.get(t, []) else 0
+                weight_pre  = 1 if p in pn.pre.get(t, []) else 0
+                
+                incidence_val = weight_post - weight_pre
+                
+                if incidence_val != 0:
+                    token_flow.append(incidence_val * sigma_vars[t])
+            
+            prob += (m0_val + pulp.lpSum(token_flow) == m_target_val, f"Eq_Place_{p}")
+
+        status = prob.solve(pulp.PULP_CBC_CMD(msg=False))
         
-    except Exception:
+        if status == pulp.LpStatusOptimal:
+            return True
+        else:
+            return False
+
+    except Exception as e:
+        print(f"Warning: ILP check failed due to error: {e}")
         return True 
 
 
@@ -109,7 +132,6 @@ def run_deadlock(pn,
                  confirm_with_ilp: bool = True,
                  track_memory: bool = True):
     
-    # 1. Kiểm tra thư viện
     if not HAVE_DD:
         return {"found": False, "marking": None, "method": "None", 
                 "stats": TaskStats(seconds=0.0, peak_mb=0.0)}
@@ -126,7 +148,7 @@ def run_deadlock(pn,
             pre_t = set(pn.pre.get(t, set()))
             if not pre_t:
                 continue 
-                
+            
             En_t = _enabled_t(mgr, X, pre_t)
             
             Dead_BDD &= ~En_t
@@ -134,18 +156,21 @@ def run_deadlock(pn,
         model = mgr.pick(Dead_BDD)
         
         if model is None:
-            return {"found": False, "marking": None, "method": "BDD+ILP",
+            return {"found": False, "marking": None, "method": "BDD (Hybrid)",
                     "stats": TaskStats(seconds=tm.seconds, peak_mb=tm.peak_mb)}
 
         Mset = sorted([p for p, vname in X.items() if bool(model.get(vname, 0))])
         candidate_set = set(Mset)
 
         is_valid_deadlock = True
-        method_str = "BDD"
+        method_str = "BDD Only"
         
+        # 3. ILP PHASE: Verification (Hybrid Check)
         if confirm_with_ilp and HAVE_PULP:
-            method_str = "BDD + ILP Verification"
-            if not _verify_with_ilp(pn, candidate_set):
+            method_str = "Hybrid (BDD + ILP State Eq)"
+            is_reachable_structurally = _verify_reachability_with_ilp(pn, candidate_set)
+            
+            if not is_reachable_structurally:
                 is_valid_deadlock = False
         
         if not is_valid_deadlock:
