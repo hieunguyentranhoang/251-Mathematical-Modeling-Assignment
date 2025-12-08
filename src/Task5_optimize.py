@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, Optional, Any, Iterable, Set, Tuple, List
+import random 
 
 try:
     from utils import Timer, TaskStats
@@ -29,7 +30,7 @@ try:
     from dd import autoref as _bdd
 except Exception:
     HAVE_DD = False
-    _bdd = None  # type: ignore
+    _bdd = None  
 
 
 def _as_marking_set(explicit_res) -> Optional[Set[frozenset]]:
@@ -91,18 +92,60 @@ def _obj(marking: Iterable[str], W: Dict[str, int]) -> int:
     return sum(W.get(p, 0) for p in marking)
 
 
-# ---------- main entry --------------------------------------------------------
-
+def _guided_pick(bdd, S, place_vars: Dict[str, str], weights: Dict[str, int], 
+                 randomize: bool = False, epsilon: float = 0.5) -> frozenset:
+    current_u = S
+    chosen_places = []
+    
+    for p, vname in place_vars.items():
+        var_node = bdd.var(vname)
+        
+        pos_feasible = (current_u & var_node) != bdd.false
+        
+        neg_feasible = (current_u & ~var_node) != bdd.false
+        
+        must_pick_pos = pos_feasible and not neg_feasible
+        must_pick_neg = neg_feasible and not pos_feasible
+        can_pick_both = pos_feasible and neg_feasible
+        
+        choice = False 
+        
+        if must_pick_pos:
+            choice = True
+        elif must_pick_neg:
+            choice = False
+        elif can_pick_both:
+            if randomize and random.random() < epsilon:
+                choice = random.choice([True, False])
+            else:
+                w = weights.get(p, 0)
+                if w > 0:
+                    choice = True
+                elif w < 0:
+                    choice = False
+                else:
+                    choice = random.choice([True, False])
+        else:
+            break 
+            
+        if choice:
+            chosen_places.append(p)
+            current_u &= var_node
+        else:
+            current_u &= ~var_node
+            
+    return frozenset(chosen_places)
+# ---- main entry ------
 def optimize(pn=None,
              bdd_res=None,
              explicit_res=None,
              bdd_manager=None, reachable_bdd=None, place_vars=None, count=None,
              weights: Optional[Dict[str, int]] = None,
-             sample_limit: int = 50_000,
+             sample_limit: int = 1000, 
              enumeration_threshold: int = 200_000,
              seed: Optional[int] = None,
              track_memory: bool = True):
-    import random
+    
     if seed is not None:
         random.seed(seed)
 
@@ -126,46 +169,55 @@ def optimize(pn=None,
         best_v = None
         method = "n/a"
 
+        # CASE 1: Duyệt cạn 
         if V is not None and len(V) <= enumeration_threshold:
             method = "enumerate_explicit"
             for m in V:
                 v = _obj(m, W)
                 if (best_v is None) or (v > best_v):
                     best_v, best_m = v, m
-        else:
-            if HAVE_DD and bdd is not None and S0 is not None and X is not None:
-                S = S0
-                if (N is not None) and (N <= enumeration_threshold):
-                    method = "enumerate_bdd"
-                    seen = set()
-                    while True:
-                        model = bdd.pick(S)
-                        if model is None:
-                            break
-                        m = frozenset(p for p, vname in X.items() if bool(model.get(vname, 0)))
-                        if m not in seen:
-                            seen.add(m)
-                            v = _obj(m, W)
-                            if (best_v is None) or (v > best_v):
-                                best_v, best_m = v, m
-                        # block exact cube
-                        cube = bdd.true
-                        for p, vname in X.items():
-                            v = bdd.var(vname)
-                            cube &= (v if p in m else ~v)
-                        S = S & ~cube
-
-                if best_m is None:
-                    method = "sample_bdd"
-                    for _ in range(sample_limit):
-                        model = bdd.pick(S)
-                        if model is None:
-                            break
-                        m = frozenset(p for p, vname in X.items() if bool(model.get(vname, 0)))
+        
+        # CASE 2: BDD 
+        elif HAVE_DD and bdd is not None and S0 is not None and X is not None:
+            S = S0
+            if (N is not None) and (N <= enumeration_threshold):
+                method = "enumerate_bdd"
+                seen = set()
+                temp_S = S
+                while True:
+                    model = bdd.pick(temp_S)
+                    if model is None:
+                        break
+                    m = frozenset(p for p, vname in X.items() if bool(model.get(vname, 0)))
+                    
+                    if m not in seen:
+                        seen.add(m)
                         v = _obj(m, W)
                         if (best_v is None) or (v > best_v):
                             best_v, best_m = v, m
-
+                    
+                    cube = bdd.true
+                    for p, vname in X.items():
+                        v_node = bdd.var(vname)
+                        cube &= (v_node if p in m else ~v_node)
+                    temp_S = temp_S & ~cube
+            else:
+                method = "heuristic_bdd_search" 
+                
+                # Bước 1: Greedy Search
+                m_greedy = _guided_pick(bdd, S, X, W, randomize=False)
+                v_greedy = _obj(m_greedy, W)
+                best_v, best_m = v_greedy, m_greedy
+                
+                # Bước 2: Randomized Search 
+                iters = min(sample_limit, 500)
+                
+                for _ in range(iters):
+                    m_rand = _guided_pick(bdd, S, X, W, randomize=True, epsilon=0.5)
+                    v_rand = _obj(m_rand, W)
+                    
+                    if v_rand > best_v:
+                        best_v, best_m = v_rand, m_rand
         found = best_m is not None
         return {
             "found": found,
@@ -174,8 +226,6 @@ def optimize(pn=None,
             "method": (method if found else "n/a"),
             "stats": TaskStats(seconds=tm.seconds, peak_mb=tm.peak_mb),
         }
-
-
 def run_optimize(*a, **k):        return optimize(*a, **k)
 def optimize_over_reach(*a, **k): return optimize(*a, **k)
 def run(*a, **k):                 return optimize(*a, **k)
