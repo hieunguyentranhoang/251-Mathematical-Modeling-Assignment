@@ -20,8 +20,12 @@ These techniques are exposed through the following tasks:
   Produces the reachable state set and basic statistics (state count, time, memory) used as a baseline and for cross-checking the symbolic methods.
 
 - **Task 3 – Symbolic Reachability (BDDs)**  
-  Encodes markings as Boolean vectors and transitions as BDD relations to compute the reachable set symbolically.  
-  Supports both monolithic transition relations and topological (per-transition) image computation for experimentation.
+Encodes markings as Boolean vectors and transitions as BDD relations to compute the reachable set symbolically.  
+Supports multiple image computation modes:
+  - **relation**: a monolithic transition relation \(T(X,X')\);
+  - **topological**: per–transition relations \(R_t(X,X')\);
+  - **hybrid**: combines both for experimentation.  
+The mode is selected via the `--image_mode` flag in `Task6_cli.py`.
 
 - **Task 4 – Deadlock Analysis (Hybrid BDD + ILP)**  
   Uses the BDD-computed reachable set to symbolically filter **dead markings** (no enabled transitions),  
@@ -129,51 +133,65 @@ A synthetic model designed to verify all logic components: Parser, Concurrency (
 We provide specific commands to reproduce the results reported in the **Experimental Evaluation** section of the report.
 
 ### 1. Functional Verification
-* **Model:** `functional_test.pnml`
+* **Model:** `functional_test.pnml`  
 * **Goal:** Verify correctness of Parser, Reachability, Deadlock (finding the trap state), and Optimization (avoiding the trap).
+
 * **Command:**
-    ```bash
-    python src/Task6_cli.py --pnml cases/functional_test.pnml \
-      --objective custom --weights 0,0,0,0,10 \
-      --confirm_ilp --seed 42 | tee logs/functional_test.log
-    ```
-    *(Note: The custom weight vector `0,0,0,0,10` targets the `p_final` place to test if the optimizer can bypass the deadlock).*
-  
+```bash
+python src/Task6_cli.py --pnml cases/functional_test.pnml \
+  --objective custom --weights 0,0,0,0,10 \
+  --confirm_ilp --image_mode relation \
+  --seed 42 | tee logs/functional_test.log
+```
+
 **Explanation:**
 * `--objective custom --weights 0,0,0,0,10`: assigns a high reward to the `p_final` place and zero to other places, forcing the optimizer to prefer the successful completion marking.
 * `--confirm_ilp`: enables the hybrid BDD+ILP deadlock checker to prove that the reported deadlock is reachable using the state equation.
-* `--seed 42`: makes any randomized components reproducible across runs.
+* `--image_mode relation`: runs Task 3 with the monolithic transition relation ($T(X,X')$), which is the baseline algorithm described in the report. Changing this to `topological` or `hybrid` lets you experiment with the alternative image computation schemes.
+  * `Note`: To switch to the Topological method (Method 2 in the report), change this flag to `--image_mode topological`.
 
+* `--seed 42`: makes any randomized components reproducible across runs.
 ### 2. Performance Benchmark (Explicit vs. BDD)
 * **Model:** `philosophers_12.pnml` (State space: ~39,202)
 * **Goal:** Demonstrate the "Variable Ordering" phenomenon where BDD consumes significantly more memory than Explicit BFS due to dependency distance.
+
 * **Command:**
-    ```bash
-    # Use -u (unbuffered) to ensure logs are written immediately during long runs
-    python -u src/Task6_cli.py --pnml cases/philosophers_12.pnml \
-      --objective uniform \
-      --confirm_ilp --seed 42 | tee logs/philosophers_12.log
-    ```
+```bash
+# Use -u (unbuffered) to ensure logs are written immediately during long runs
+python -u src/Task6_cli.py --pnml cases/philosophers_12.pnml \
+  --objective uniform \
+  --confirm_ilp --image_mode relation \
+  --seed 42 | tee logs/philosophers_12.log
+```
+
 **Explanation:**
 * `python -u`: runs Python in unbuffered mode so that progress logs (especially BDD iterations) are flushed to the terminal immediately during long executions.
 * `--objective uniform`: assigns equal weight to all places; this benchmark focuses on reachability and performance rather than a specific “business” goal.
 * `--confirm_ilp`: is kept on because this model contains a real circular deadlock; ILP is used to validate the deadlock witness returned by the BDD analysis.
+* `--image_mode relation`: uses the monolithic BDD relation so that the performance comparison with Explicit BFS matches the main algorithm in the report.
+To additionally study the new topological method, you can rerun the same command with `--image_mode topological` and compare the time/memory overhead.
 
 ### 3. Adaptive Optimization (Sampling Mode)
 * **Model:** `switches_15.pnml` (State space: 32,768)
 * **Goal:** Trigger the adaptive mechanism. Since the state space > 5000 (threshold), the tool will switch from `enumerate` to `sample_bdd` to find the optimum efficiently.
+
 * **Command:**
-    ```bash
-    python src/Task6_cli.py --pnml cases/switches_15.pnml \
-      --objective uniform \
-      --enumeration_threshold 5000 \
-      --sample_limit 1000 \
-      --seed 42 | tee logs/switches_15.log
-    ```
+```bash
+python src/Task6_cli.py --pnml cases/switches_15.pnml \
+  --objective uniform \
+  --enumeration_threshold 5000 \
+  --sample_limit 1000 \
+  --image_mode relation \
+  --seed 42 | tee logs/switches_15.log
+```
+
 **Explanation:**
 * `--objective uniform`: again uses equal weights; the purpose of this benchmark is to stress the optimization engine on a large, deadlock-free state space.
-* `--enumeration_threshold 5000`: forces the optimizer to switch from full enumeration to BDD-based sampling once the reachable set is larger than 5000 states (here it is $2^{15} = 32768$).
+* `--enumeration_threshold 5000`: forces the optimizer to switch from full enumeration to BDD-based sampling once the reachable set is larger than 5000 states (here it is $2^{15} = 32,768$).
 * `--sample_limit 1000`: bounds the number of BDD-guided samples explored, providing a good trade-off between runtime and solution quality for this model.
+* `--image_mode relation`: keeps the BDD reachability phase in the monolithic mode for consistency with the other experiments. As before, `topological` and `hybrid` can be used to explore the alternative image computation strategies; the optimization logic itself is independent of the chosen mode.
+     * `Note`: To switch to the Topological method (Method 2 in the report), change this flag to `--image_mode topological`.
+
 ---
 
 ## 📊 Expected Output
@@ -225,17 +243,17 @@ This section presents the actual execution logs generated by our tool in our loc
 
 **Execution Log:**
 ```text
-================================================================================
-RESULTS SUMMARY | Model: cases/functional_test.pnml
-================================================================================
-Task | Component           | Result                       | Time (s) | Mem (MB)
---------------------------------------------------------------------------------
-1    | PNML Parsing        | |P|=5, |T|=4                 | 0.0005   | -
-2    | Explicit Reach      | Count=4                      | 0.0031   | 0.00
-3    | BDD Reach           | Count=4 (iters=2)            | 0.0092   | 0.06
-4    | Deadlock Check      | FOUND @ ['p_final']          | 0.1446   | 0.15
-5    | Optimization        | Max=10                       | 0.0014   | 0.00
-================================================================================
+=====================================================================================
+ RESULTS SUMMARY | Model: cases/functional_test.pnml
+=====================================================================================
+Task  | Component            | Result                         | Time (s)   | Mem (MB)  
+-------------------------------------------------------------------------------------
+1     | PNML Parsing         | |P|=5, |T|=4                   | 0.0006     | -         
+2     | Explicit Reach       | Count=4                        | 0.0026     | 0.00      
+3     | BDD (topo)           | Count=4 (iters=2)              | 0.0056     | 0.09      
+4     | Deadlock Check       | FOUND @ ['p_final']            | 0.0589     | 0.15      
+5     | Optimization         | Max=10                         | 0.0011     | 0.00      
+=====================================================================================
 ```
 
 ### 2. `philosophers_12.pnml`
@@ -245,11 +263,11 @@ Task | Component           | Result                       | Time (s) | Mem (MB)
 =====================================================================================
 Task  | Component            | Result                         | Time (s)   | Mem (MB)  
 -------------------------------------------------------------------------------------
-1     | PNML Parsing         | |P|=36, |T|=36                 | 0.0020     | -         
-2     | Explicit Reach       | Count=39202                    | 1.6067     | 29.20     
-3     | BDD Reach            | Count=39202 (iters=12)         | 304.6340   | 1873.62   
-4     | Deadlock Check       | FOUND @ ['p0_has_left', '...   | 3.3144     | 6.00      
-5     | Optimization         | Max=12                         | 2.4697     | 363.37    
+1     | PNML Parsing         | |P|=36, |T|=36                 | 0.0030     | -         
+2     | Explicit Reach       | Count=39202                    | 1.5114     | 29.20     
+3     | BDD (topo)           | Count=39202 (iters=12)         | 380.0044   | 2963.94   
+4     | Deadlock Check       | FOUND @ ['p0_has_left', '...   | 3.9305     | 4.90      
+5     | Optimization         | Max=12                         | 2.3052     | 42.88     
 =====================================================================================
 ```
 
@@ -261,10 +279,10 @@ Task  | Component            | Result                         | Time (s)   | Mem
 Task  | Component            | Result                         | Time (s)   | Mem (MB)  
 -------------------------------------------------------------------------------------
 1     | PNML Parsing         | |P|=30, |T|=30                 | 0.0015     | -         
-2     | Explicit Reach       | Count=32768                    | 2.0487     | 24.76     
-3     | BDD Reach            | Count=32768 (iters=15)         | 22.4772    | 235.35    
-4     | Deadlock Check       | None                           | 0.3965     | 0.00      
-5     | Optimization         | Max=15                         | 0.9675     | 53.35     
+2     | Explicit Reach       | Count=32768                    | 1.9310     | 24.76     
+3     | BDD (topo)           | Count=32768 (iters=15)         | 39.0896    | 357.13    
+4     | Deadlock Check       | None                           | 0.4656     | 0.00      
+5     | Optimization         | Max=15                         | 0.8695     | 13.34     
 =====================================================================================
 ```
 
