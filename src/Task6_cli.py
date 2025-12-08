@@ -2,10 +2,9 @@
 Task6_cli.py — Orchestration CLI for CO2011 Petri Net Analyzer
 - Task 1: PNML parse
 - Task 2: Explicit reachability
-- Task 3: BDD reachability
+- Task 3: BDD reachability (Targeting Task3_bdd_reach.py with topological support)
 - Task 4: Deadlock (BDD + optional ILP confirm)
 - Task 5: Optimization over reachable markings
-- Robust entrypoint & signature matching, weights/seed flags, clean SUMMARY
 """
 
 from __future__ import annotations
@@ -77,8 +76,14 @@ def call_compatible(fn: Any, **kwargs) -> Any:
     """Call fn with subset of kwargs that match its real signature."""
     sig = inspect.signature(fn)
     allowed = set(sig.parameters.keys())
-    passing = {k: v for k, v in kwargs.items() if k in allowed}
-    return fn(**passing)
+    
+    has_var_keyword = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values())
+    
+    if has_var_keyword:
+        return fn(**kwargs)
+    else:
+        passing = {k: v for k, v in kwargs.items() if k in allowed}
+        return fn(**passing)
 
 
 def build_argparser() -> argparse.ArgumentParser:
@@ -101,8 +106,17 @@ def build_argparser() -> argparse.ArgumentParser:
         action="store_true",
         help="Disable tracemalloc peak-memory reporting",
     )
+    
+    p.add_argument(
+        "--image_mode",
+        default="topological",
+        choices=["topological", "relation", "hybrid"],
+        help="BDD Image computation mode (default: topological)"
+    )
+
     p.add_argument("--enumeration_threshold", type=int, default=5000)
     p.add_argument("--sample_limit", type=int, default=20000)
+    
     # optimization-related flags
     p.add_argument(
         "--weights",
@@ -170,9 +184,9 @@ def main() -> None:
     # --- Task 2: Explicit reachability
     info("Task 2: BFS explicit reachability ...")
     t2s = time.perf_counter()
-    exp_reach = None          # container of markings for logging
+    exp_reach = None          
     exp_count: Optional[int] = None
-    exp_res_full = None       # full object to pass to Task 5
+    exp_res_full = None       
 
     try:
         import Task2_explicit as T2
@@ -183,28 +197,22 @@ def main() -> None:
             contains_any=["reach", "bfs", "explicit"],
         )
         res = call_compatible(fn, **common_kwargs)
-        exp_res_full = res  # raw result for Task 5
+        exp_res_full = res  
 
         # Normalise for logging
         if isinstance(res, dict):
-            # Prefer any nested "result" dataclass if present
             if "result" in res and res["result"] is not None:
                 exp_res_full = res["result"]
             exp_reach = res.get("reach", None)
             exp_count = res.get("count", None)
-            # Fallbacks
-            if exp_reach is None and exp_res_full is not None and hasattr(
-                exp_res_full, "markings"
-            ):
+            if exp_reach is None and exp_res_full is not None and hasattr(exp_res_full, "markings"):
                 exp_reach = getattr(exp_res_full, "markings")
             if exp_count is None and exp_reach is not None:
                 exp_count = len(exp_reach)
         elif hasattr(res, "markings"):
-            # dataclass ExplicitReachResult-like
             exp_reach = getattr(res, "markings")
             exp_count = len(exp_reach) if exp_reach is not None else None
         else:
-            # Assume container of markings
             exp_reach = res
             exp_count = len(exp_reach) if exp_reach is not None else None
 
@@ -219,7 +227,7 @@ def main() -> None:
     )
 
     # --- Task 3: BDD reachability
-    info("Task 3: BDD symbolic reachability ...")
+    info(f"Task 3: BDD symbolic reachability (Mode: {args.image_mode}) ...")
     t3s = time.perf_counter()
     bdd_fix = None
     bdd_count = None
@@ -234,16 +242,20 @@ def main() -> None:
             prefer=["run_bdd", "bdd_reachability", "symbolic_reachability", "run"],
             contains_any=["bdd", "reach", "fixpoint"],
         )
-        res = call_compatible(fn, pn=pn, track_memory=not args.no_memory)
+        
+        res = call_compatible(
+            fn, 
+            pn=pn, 
+            track_memory=not args.no_memory,
+            image_mode=args.image_mode 
+        )
 
         if isinstance(res, dict):
-            # canonical keys
             bdd_fix = res.get("bdd", res.get("reachable_bdd"))
             bdd_count = res.get("count")
             bdd_iters = res.get("iterations")
             bdd_res_full = res.get("result", res)
         else:
-            # dataclass-like
             bdd_res_full = res
             bdd_fix = getattr(res, "reachable_bdd", None)
             bdd_count = getattr(res, "count", None)
@@ -251,6 +263,8 @@ def main() -> None:
 
     except Exception as e:
         info(f"[WARN] Task 3 failed: {e}")
+        import traceback
+        traceback.print_exc()
 
     t3e = time.perf_counter()
     peak3 = peak_mb(mem_on)
@@ -396,7 +410,9 @@ def main() -> None:
     # Task 3: BDD
     res_t3 = f"Count={bdd_count}" if bdd_count is not None else "Failed"
     if bdd_iters is not None: res_t3 += f" (iters={bdd_iters})"
-    print(f"{'3':<5} | {'BDD Reach':<20} | {res_t3:<30} | {t3e - t3s:<10.4f} | {peak3:<10.2f}")
+    
+    t3_name = f"BDD ({args.image_mode[:4]})" 
+    print(f"{'3':<5} | {t3_name:<20} | {res_t3:<30} | {t3e - t3s:<10.4f} | {peak3:<10.2f}")
 
     # Task 4: Deadlock
     status_t4 = "FOUND" if deadlock_found else "None"
