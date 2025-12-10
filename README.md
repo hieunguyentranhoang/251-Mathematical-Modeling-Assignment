@@ -104,7 +104,7 @@ To evaluate the tool's correctness and scalability, we employ three distinct PNM
 A synthetic model designed to verify all logic components: Parser, Concurrency (Fork/Join), Self-loop updates, and Deadlock detection.
 
 <p align="center">
-  <img src="functional_test.png" alt="Functional Test Petri Net" width="600">
+  <img src="Figure/functional_test.png" alt="Functional Test Petri Net" width="600">
   <br>
   <em>Figure 1: A compact net featuring non-determinism, concurrency, and a trap state.</em>
 </p>
@@ -115,7 +115,7 @@ A synthetic model designed to verify all logic components: Parser, Concurrency (
 * **Visualization:** The diagram below represents a segment of the ring ($P_i$ and $P_{i+1}$ competing for $Fork_{i+1}$).
 
 <p align="center">
-  <img src="philosophers_12.png" alt="Dining Philosophers Representative View" width="100%">
+  <img src="Figure/philosophers_12.png" alt="Dining Philosophers Representative View" width="100%">
   <br>
   <em>Figure 2: Representative segment of the 12-Philosopher ring showing resource competition.</em>
 </p>
@@ -126,7 +126,7 @@ A synthetic model designed to verify all logic components: Parser, Concurrency (
 * **Visualization:** The diagram shows independent switch modules.
 
 <p align="center">
-  <img src="switches_15.png" alt="Switches 15 Representative View" width="100%">
+  <img src="Figure/switches_15.png" alt="Switches 15 Representative View" width="100%">
   <br>
   <em>Figure 3: Independent toggle switch modules generating a combinatorial state space.</em>
 </p>
