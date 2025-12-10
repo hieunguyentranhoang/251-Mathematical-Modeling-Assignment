@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Set, FrozenSet
@@ -13,7 +12,7 @@ class ExplicitReachResult:
 
 def bfs_reachability(pn: PetriNet, track_memory: bool = True) -> ExplicitReachResult:
     """
-    Enumerate all reachable markings from initial marking using BFS.  :contentReference[oaicite:5]{index=5}
+    Enumerate all reachable markings from initial marking using BFS.
     """
     with Timer(enable_memory=track_memory) as tm:
         visited: Set[FrozenSet[str]] = set([pn.initial_marking])
@@ -29,7 +28,6 @@ def bfs_reachability(pn: PetriNet, track_memory: bool = True) -> ExplicitReachRe
         markings=visited,
         stats=TaskStats(seconds=tm.seconds, peak_mb=tm.peak_mb, extra={"num_markings": len(visited)}),
     )
-# --- SAFE WRAPPER (Task 2) ---
 import inspect
 from typing import Any, Dict
 
