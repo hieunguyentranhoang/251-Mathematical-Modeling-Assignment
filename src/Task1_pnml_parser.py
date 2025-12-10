@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import annotations
 import xml.etree.ElementTree as ET
 from typing import Dict, Set, List
@@ -14,7 +13,7 @@ def parse_pnml(file_path: str) -> PetriNet:
       - transitions
       - flow relations (pre, post)
     Consistency: every arc must reference existing nodes.
-    Assumption: input models are 1-safe (per assignment).  :contentReference[oaicite:3]{index=3}
+    Assumption: input models are 1-safe (per assignment). 
     """
     tree = ET.parse(file_path)
     root = tree.getroot()
@@ -29,7 +28,6 @@ def parse_pnml(file_path: str) -> PetriNet:
     arcs: List[tuple[str, str]] = []
     place_nodes: Dict[str, ET.Element] = {}
 
-    # places + initial marking
     init_mark: Set[str] = set()
     for p in iter_local(root, "place"):
         pid = p.attrib.get("id")
@@ -38,7 +36,6 @@ def parse_pnml(file_path: str) -> PetriNet:
         places.append(pid)
         place_nodes[pid] = p
         init_val = 0
-        # typical encodings: <initialMarking><text>1</text></initialMarking>
         for im in p:
             if _local(im.tag).lower() in {"initialmarking", "initmarking"}:
                 text_val = None
@@ -70,7 +67,7 @@ def parse_pnml(file_path: str) -> PetriNet:
         if s and t:
             arcs.append((s, t))
 
-    # consistency (Task 1)  :contentReference[oaicite:4]{index=4}
+    # consistency 
     nodes = set(places) | set(transitions)
     for s, t in arcs:
         if s not in nodes or t not in nodes:
